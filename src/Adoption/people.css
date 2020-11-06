@@ -1,0 +1,14 @@
+.people-item {
+    text-align: center;
+    padding: 8px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+#person-input {
+    margin-bottom: 8px;
+}

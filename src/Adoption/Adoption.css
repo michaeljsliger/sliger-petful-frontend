@@ -1,0 +1,22 @@
+.adoption-list {
+    display: flex;
+    flex-direction: row;
+    background-color: #e3e3e3;
+    width: 100vw;
+    padding: 8px;
+}
+
+.animal-box {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.animal-box img {
+    width: 100%;
+}
+
+h5 {
+    text-align: center;
+    color: red;
+}
