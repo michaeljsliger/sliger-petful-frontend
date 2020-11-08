@@ -10,6 +10,7 @@ class Adoption extends React.Component {
         cat: {},
         dog: {},
         adopted: [],
+        adopt: false,
     }
 
     componentDidMount() {
@@ -28,6 +29,13 @@ class Adoption extends React.Component {
                     return this.setState({ peopleError: json.message });
                 }
                 this.setState({ people: json, peopleError: null })
+            }).then(() => {
+                // after second fetch call for all people,
+                // run the looping setTimeout to simulate adoptions
+                // alert can be removed later if necessary
+                // while loop runs, set this.adopt to false, so buttons are disabled.
+                this.simulateAdopts();
+
             }).catch(e => {
                 this.setState({ peopleError: e.message });
             })
@@ -59,8 +67,19 @@ class Adoption extends React.Component {
                     dog: json.dog || {},
                     error: '',
                     peopleError: '',
+                    adopt: false,
                 });
+            }).then(() => {
+                if (this.state.people.length > 4) {
+                    setTimeout(this.simulateAdopts(), 5000);
+                } 
             })
+    }
+
+    onAdoptWrapper = async (type) => {
+        this.state.adopt = false;
+        await this.simulateAdopts();
+        this.state.adopt = true;
     }
 
     onNameFormSubmit = (event) => {
@@ -86,7 +105,12 @@ class Adoption extends React.Component {
                         if (json.message) {
                             return this.setState({ peopleError: json.message });
                         }
-                        this.setState({ people: json, peopleError: null })
+                        this.setState({ people: json, peopleError: null, adopt: true })
+                    }).then(() => {
+                        // queue people behind input
+                        if (this.state.people.length === 1) {
+                            setTimeout(this.simulateQueuing(), 5000);
+                        }
                     }).catch(e => {
                         this.setState({ peopleError: e.message });
                     })
@@ -94,12 +118,78 @@ class Adoption extends React.Component {
             })
     }
 
+    simulateAdopts() {
+        this.state.adopt = false;
+        for (let i = 0; i < this.state.people.length; i++) {
+            setTimeout(this.adoptTimeouts(this.state.people[i], i), 1000);
+        }
+    }
+    adoptTimeouts(person, i) {
+        const petTypes = ['cats', 'dogs'];
+        const index = Math.floor(Math.random() * petTypes.length);
+       return setTimeout(() => {
+            this.onAdopt(petTypes[index]);
+        }, i * 5000)
+    }
+
+    simulateQueuing() {
+        for (let i = 0; i < 4; i++) { 
+            setTimeout(this.queueTimeouts(i), 1000);
+        }
+    }
+    queueTimeouts(i) {
+        const names = ['Patrick', 'Sarah',
+         'Hannah', 'Joshua', 'Moses', 'Buford', 
+         'Phineas', 'Ferb', 'Isabella', 'Candace',
+         'Travis', 'Danielle', 'The King', 'The Queen',
+         'The Prince', 'The Pauper', 'The Princess',
+         'Matthew', 'Chris', 'Sandra', 'Constantine',
+         'Babylon'
+        ]
+        const index = Math.floor(Math.random() * names.length);
+        return setTimeout(() => {
+            
+            const value = names[index];
+
+            const postObj = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    person: value
+                })
+            }
+            /* SEPARATE FETCH CALL FROM NAMESUBMIT */
+            fetch(`${config.SERVER_URL}/api/people`, postObj)
+                .then(res => res.json())
+                .then(json => {
+                    fetch(`${config.SERVER_URL}/api/people`)
+                        .then(res => res.json())
+                        .then(json => {
+                            if (json.message) {
+                                return this.setState({ peopleError: json.message });
+                            }
+                            this.setState({ people: json, peopleError: null })
+                        }).then(() => {
+                            // queue people behind input
+                            if (this.state.people.length === 1) {
+                                this.simulateQueuing();
+                            }
+                        }).catch(e => {
+                            this.setState({ peopleError: e.message });
+                        })
+                    this.setState({ people: json })
+                })
+        }, i*5000);
+    }
+
     render() {
         return (
             <div className="adoption-list">
                 <div className="animal-box">
                     <Animal animal={this.state.cat} />
-                    <button onClick={e => this.onAdopt('cats')}>Adopt</button>
+                    <button disabled={!this.state.adopt} onClick={e => this.onAdoptWrapper('cats')}>Adopt</button>
                 </div>
                 <div>
                     <People onFormSubmit={this.onNameFormSubmit} people={this.state.people}
@@ -111,7 +201,7 @@ class Adoption extends React.Component {
                 </div>
                 <div className="animal-box">
                     <Animal animal={this.state.dog} />
-                    <button onClick={e => this.onAdopt('dogs')}>Adopt</button>
+                    <button disabled={!this.state.adopt} onClick={e => this.onAdoptWrapper('dogs')}>Adopt</button>
                 </div>
             </div>
         )

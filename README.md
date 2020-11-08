@@ -12,6 +12,15 @@ As a user you can:
 Add your name to the waitlist in the 
 center, and click adopt
 below the pet you'd like to adopt.
+
+Random users are automatically queued 
+in front of you on page load, and 
+behind you when you are in the front.
+
+Adopting a pet will reset the cycle.
+
+This looping is handled in the front
+end.
         
 The pets are displayed in a FIFO Queue 
 data structure, and clicking adopt 
@@ -21,3 +30,12 @@ Once the queue is empty, the server
 automatically refills the dummy data 
 back into the queue, so there are no 
 gaps.
+
+GitHub
+==== Back-End ====
+https://github.com/michaeljsliger/sliger-petful
+
+
+
+==== Front End ====
+https://github.com/michaeljsliger/sliger-petful-frontend
