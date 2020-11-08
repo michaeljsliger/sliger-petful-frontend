@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 function Home() {
     return (
     <div className="home">
+        <img src="https://wishbonepetrescue.org/wp-content/uploads/sites/45/2014/10/Wishbone-Adopt-homepg-2.jpg" alt="Necessary pet image"/>
+        <br />
         <h3>The adoption process:</h3>
         <p>Click below to view the pets up for adoption.</p>
         <br />
