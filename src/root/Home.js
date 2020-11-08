@@ -17,6 +17,8 @@ function Home() {
         <br />
         <p>Once the queue is empty, the server automatically refills</p>
         <p>the dummy data back into the queue, so there are no gaps.</p>
+        <br />
+        <p>Find your next friend!</p>
         <Link to="/adopt"><button>Adopt!</button></Link>
     </div>
     )}
