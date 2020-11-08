@@ -196,7 +196,7 @@ class Adoption extends React.Component {
                         peopleError={this.state.peopleError}
                     />
                     <h5>
-                        {this.state.error}
+                        {(!this.state.people.length) ? 'Add yourself to queue before you adopt' : this.state.error}
                     </h5>
                 </div>
                 <div className="animal-box">
