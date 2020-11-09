@@ -11,6 +11,7 @@ class Adoption extends React.Component {
         dog: {},
         adopted: [],
         adopt: false,
+        currentUser: '',
     }
 
     componentDidMount() {
@@ -61,21 +62,45 @@ class Adoption extends React.Component {
             .then(json => {
                 const person = this.state.people.splice(0, 1)
                 alert(`${person} adopted one of the ${type}!`)
-                this.setState({
-                    people: this.state.people,
-                    cat: json.cat || {},
-                    dog: json.dog || {},
-                    error: '',
-                    peopleError: '',
-                    adopt: false,
-                });
+
+
+                if (this.state.people[0] === this.state.currentUser) {
+                    this.setState({
+                        adopt: true,
+                        people: this.state.people,
+                        cat: json.cat || {},
+                        dog: json.dog || {},
+                        error: '',
+                        peopleError: '',
+                    })
+                } else {
+                    this.setState({
+                        people: this.state.people,
+                        cat: json.cat || {},
+                        dog: json.dog || {},
+                        error: '',
+                        peopleError: '',
+                        adopt: false,
+                    });
+                }
             }).then(() => {
                 if (this.state.people.length > 4) {
                     setTimeout(this.simulateAdopts(), 5000);
-                } 
+                }
             })
     }
 
+
+    findCurrentUser = (state) => {
+        console.log(this.state);
+        if (state.people) {
+            // comparison
+            return state.people[0] == state.currentUser;
+        } else {
+            // no one in queue
+            return false;
+        }
+    }
     onAdoptWrapper = async (type) => {
         this.state.adopt = false;
         await this.simulateAdopts();
@@ -83,8 +108,10 @@ class Adoption extends React.Component {
     }
 
     onNameFormSubmit = (event) => {
+        // manual form submits
         event.preventDefault();
         const value = event.target[0].value;
+        this.setState({ currentUser: value });
 
         const postObj = {
             method: 'POST',
@@ -105,11 +132,14 @@ class Adoption extends React.Component {
                         if (json.message) {
                             return this.setState({ peopleError: json.message });
                         }
-                        this.setState({ people: json, peopleError: null, adopt: true })
+                        this.setState({ people: json, peopleError: null })
                     }).then(() => {
                         // queue people behind input
                         if (this.state.people.length === 1) {
                             setTimeout(this.simulateQueuing(), 5000);
+                        }
+                        if (this.state.people[0] === this.state.currentUser) {
+                            this.setState({ adopt: true })
                         }
                     }).catch(e => {
                         this.setState({ peopleError: e.message });
@@ -127,28 +157,28 @@ class Adoption extends React.Component {
     adoptTimeouts(person, i) {
         const petTypes = ['cats', 'dogs'];
         const index = Math.floor(Math.random() * petTypes.length);
-       return setTimeout(() => {
+        return setTimeout(() => {
             this.onAdopt(petTypes[index]);
         }, i * 5000)
     }
 
     simulateQueuing() {
-        for (let i = 0; i < 4; i++) { 
+        for (let i = 0; i < 4; i++) {
             setTimeout(this.queueTimeouts(i), 1000);
         }
     }
     queueTimeouts(i) {
         const names = ['Patrick', 'Sarah',
-         'Hannah', 'Joshua', 'Moses', 'Buford', 
-         'Phineas', 'Ferb', 'Isabella', 'Candace',
-         'Travis', 'Danielle', 'The King', 'The Queen',
-         'The Prince', 'The Pauper', 'The Princess',
-         'Matthew', 'Chris', 'Sandra', 'Constantine',
-         'Babylon'
+            'Hannah', 'Joshua', 'Moses', 'Buford',
+            'Phineas', 'Ferb', 'Isabella', 'Candace',
+            'Travis', 'Danielle', 'The King', 'The Queen',
+            'The Prince', 'The Pauper', 'The Princess',
+            'Matthew', 'Chris', 'Sandra', 'Constantine',
+            'Babylon'
         ]
         const index = Math.floor(Math.random() * names.length);
         return setTimeout(() => {
-            
+
             const value = names[index];
 
             const postObj = {
@@ -170,18 +200,23 @@ class Adoption extends React.Component {
                             if (json.message) {
                                 return this.setState({ peopleError: json.message });
                             }
-                            this.setState({ people: json, peopleError: null })
+                            this.setState({ people: json, peopleError: null, })
                         }).then(() => {
                             // queue people behind input
                             if (this.state.people.length === 1) {
                                 this.simulateQueuing();
+                            }
+                            if (this.state.people[0] === this.state.currentUser) {
+                                this.setState({adopt: true,});
+                            } else {
+                                this.setState({adopt: false});
                             }
                         }).catch(e => {
                             this.setState({ peopleError: e.message });
                         })
                     this.setState({ people: json })
                 })
-        }, i*5000);
+        }, i * 5000);
     }
 
     render() {
@@ -197,6 +232,8 @@ class Adoption extends React.Component {
                     />
                     <h5>
                         {(!this.state.people.length) ? 'Add yourself to queue before you adopt' : this.state.error}
+                        <br />
+                        {/* {(this.findCurrentUser()) ? '' : 'Wait for your turn'} */}
                     </h5>
                 </div>
                 <div className="animal-box">
